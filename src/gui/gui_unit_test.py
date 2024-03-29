@@ -8,4 +8,3 @@ if __name__ == '__main__':
     gui = GUI()
     gui.setup_gui()
     gui.run()
-    print(gui.dataset_path)

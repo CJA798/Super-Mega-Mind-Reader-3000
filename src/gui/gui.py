@@ -10,21 +10,31 @@ class GUI:
         self.viewport_height = 600
 
         self.dataset_path = None
+        self.model_path = None
         
     def setup_gui(self):
         self.add_data_container()
         self.add_model_container()
         self.add_output_container()
-        dpg.create_viewport(title="Super Mega Mind Reader 3000", width=self.viewport_width, height=self.viewport_height)
+        dpg.create_viewport(title="Super Mega Mind Reader 3000",
+                            width=self.viewport_width,
+                            height=self.viewport_height)
+        
 
     def add_data_container(self):
         def callback(sender, app_data):
             #print("Sender: ", sender)
             #print("App Data: ", app_data)
             self.dataset_path = app_data['file_path_name']
+            print("Loaded Dataset Path: ", self.dataset_path)
+        
         def preprocess_data_cb():
-            pass
-        with dpg.file_dialog(directory_selector=False, show=False, callback=callback, tag="file_dialog_tag", width=700 ,height=400):
+            print("Preprocessing data")
+
+        def collect_data_cb():
+            print("Collecting data")
+
+        with dpg.file_dialog(directory_selector=False, show=False, callback=callback, tag="data_file_dialog_tag", width=700 ,height=400):
             #dpg.add_file_extension(".*")
             dpg.add_file_extension("", color=(150, 150, 255, 255))
             dpg.add_file_extension(".csv", color=(150, 255, 150, 255))
@@ -35,10 +45,28 @@ class GUI:
                         no_close=True,
                         no_move=True,
                         no_resize=True):
-            dpg.add_button(label="Load Data", callback=lambda: dpg.show_item("file_dialog_tag"))
-            dpg.add_button(label="Preprocess Data", callback=preprocess_data_cb)
+            dpg.add_button(label="Load", callback=lambda: dpg.show_item("data_file_dialog_tag"))
+            dpg.add_button(label="Preprocess", callback=preprocess_data_cb)
+            dpg.add_button(label="Collect", callback=collect_data_cb)
 
     def add_model_container(self):
+        def callback(sender, app_data):
+            self.model_path = app_data['file_path_name']
+            print("Loaded Model Path: ", self.model_path)
+
+        def train_model_cb():
+            print("Training model")
+
+        def test_model_cb():
+            print("Testing model")
+
+        def test_option_cb():
+            print("Training option selected")
+
+        with dpg.file_dialog(directory_selector=False, show=False, callback=callback, tag="model_file_dialog_tag", width=700 ,height=400):
+            dpg.add_file_extension("", color=(150, 150, 255, 255))
+            dpg.add_file_extension(".hdf5", color=(255, 127, 80, 255))
+
         with dpg.window(label="Model",
                         width=self.viewport_width//3,
                         height=self.viewport_height//2,
@@ -46,7 +74,12 @@ class GUI:
                         no_close=True,
                         no_move=True,
                         no_resize=True):
-            dpg.add_text("Model goes here")
+            dpg.add_button(label="Load", callback=lambda: dpg.show_item("model_file_dialog_tag"))
+            dpg.add_button(label="Train", callback=train_model_cb)
+            dpg.add_button(label="Test", callback=test_model_cb)
+            dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0)
+            
+
 
     def add_output_container(self):
         with dpg.window(label="Output",
