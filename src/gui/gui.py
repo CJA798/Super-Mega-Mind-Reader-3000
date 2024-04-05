@@ -46,6 +46,9 @@ class GUI:
             # Update the dataset path
             self.dataset_handler.raw_dataset_path = app_data['file_path_name']
 
+            # Load the dataset
+            self.dataset_handler.load_from_csv(self.dataset_handler.raw_dataset_path)
+
             # Update the current dataset name displayed on the data container
             dpg.set_value("current_raw_dataset_name", f"Raw Dataset: {path.basename(self.dataset_handler.raw_dataset_path)}")
         
@@ -121,6 +124,7 @@ class GUI:
             
             def _log(sender, app_data):
                 pass
+            dpg.add_button(label="Collect", callback=_log, tag="collect_data_button")
             with dpg.collapsing_header(label="Load"):
                 dpg.add_button(label="Load", callback=load_data_cb, tag="load_data_button")
     

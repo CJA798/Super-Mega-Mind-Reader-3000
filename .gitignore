@@ -1,3 +1,12 @@
-/img/Cover.psd
 /data/
 /venv/
+
+/img/Cover.psd
+/img/icon.png
+/img/icon.svg
+
+/models/val_loss_checkpoint.hdf5
+
+/src/gui/__pycache__/
+/src/data/__pycache__/
+
