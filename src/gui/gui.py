@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-
+from os import path
 class GUI:
     def __init__(self):
         # Initialize the dearpygui context
@@ -10,6 +10,7 @@ class GUI:
         self.viewport_height = 600
 
         self.dataset_path = None
+        self.dataset_name = None
         self.model_path = None
         
     def setup_gui(self):
@@ -27,6 +28,12 @@ class GUI:
             #print("App Data: ", app_data)
             self.dataset_path = app_data['file_path_name']
             print("Loaded Dataset Path: ", self.dataset_path)
+            # Print all the items and their values in the context
+            for item in dpg.get_all_items():
+                print(item, type(item), dpg.get_value(item))
+            # Update the output container text with the dataset path
+            self.dataset_name = path.basename(self.dataset_path)
+            dpg.set_value("current_dataset_name", f"Current dataset: {self.dataset_name}")
         
         def preprocess_data_cb():
             print("Preprocessing data")
@@ -48,6 +55,7 @@ class GUI:
             dpg.add_button(label="Load", callback=lambda: dpg.show_item("data_file_dialog_tag"))
             dpg.add_button(label="Preprocess", callback=preprocess_data_cb)
             dpg.add_button(label="Collect", callback=collect_data_cb)
+            dpg.add_text(f"Current dataset: {self.dataset_name}", label="output_text", tag="current_dataset_name", wrap=300)
 
     def add_model_container(self):
         def callback(sender, app_data):
@@ -79,8 +87,6 @@ class GUI:
             dpg.add_button(label="Test", callback=test_model_cb)
             dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0)
             
-
-
     def add_output_container(self):
         with dpg.window(label="Output",
                         width=self.viewport_width*2//3,
@@ -89,8 +95,8 @@ class GUI:
                         no_close=True,
                         no_move=True,
                         no_resize=True):
-            dpg.add_text("Output goes here")
-    
+            dpg.add_text("Output goes here", label="output_text")
+        
     def run(self):
         dpg.setup_dearpygui()
         dpg.show_viewport()
