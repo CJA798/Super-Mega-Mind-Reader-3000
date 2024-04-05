@@ -65,9 +65,9 @@ class GUI:
                         no_close=True,
                         no_move=True,
                         no_resize=True):
-            dpg.add_button(label="Load", callback=lambda: dpg.show_item("data_file_dialog_tag"))
-            dpg.add_button(label="Preprocess", callback=preprocess_data_cb)
-            dpg.add_button(label="Collect", callback=collect_data_cb)
+            dpg.add_button(label="Load", callback=lambda: dpg.show_item("data_file_dialog_tag"), tag="load_data_button")
+            dpg.add_button(label="Preprocess", callback=preprocess_data_cb, tag="preprocess_data_button")
+            dpg.add_button(label="Collect", callback=collect_data_cb, tag="collect_data_button")
             dpg.add_text(f"Current dataset: {self.dataset_name}", label="output_text", tag="current_dataset_name", wrap=self.viewport_width//4)
 
     def add_model_container(self):
