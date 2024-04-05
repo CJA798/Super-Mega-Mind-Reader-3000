@@ -1,18 +1,16 @@
 import os
-from logging import getLogger, basicConfig, INFO, info, warning, error, critical
+from logging import getLogger, basicConfig, INFO, info, warning, error, critical, Formatter
 from pandas import read_csv
+from datetime import datetime
 
 
 
 class DatasetHandler():
     def __init__(self) -> None:
         # Initialize the logger
-        logger = getLogger(__name__)
-        basicConfig(filename='dataset_handler.log', level=INFO)
-        logger.info('Started')
-        logger.warning('This is a warning')
-        logger.error('This is an error')
-        logger.critical('This is a critical error')
+        self.logger = getLogger(__name__)
+        self.log_directory_path = os.path.join(os.path.dirname(__file__), 'logs')
+        basicConfig(filename=os.path.join(self.log_directory_path, f"dataset_handler_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"), level=INFO)
 
         # Initialize the dataset paths
         self.raw_dataset_path = None
