@@ -23,16 +23,29 @@ class GUI:
         
 
     def add_data_container(self):
-        def callback(sender, app_data):
-            #print("Sender: ", sender)
-            #print("App Data: ", app_data)
+        def file_dialog_cb(sender: str, app_data: dict)->None:
+            '''
+            Callback function for the file dialog in the data container.
+
+            This function updates the dataset path and name when a file is selected, and updates the current dataset name displayed on the data container.
+
+            args:
+                sender (str): The sender of the callback.
+                app_data (dict): The data passed to the callback.
+
+            returns:
+                None
+
+            raises:
+                None
+            '''
+            # Update the dataset path
             self.dataset_path = app_data['file_path_name']
-            print("Loaded Dataset Path: ", self.dataset_path)
-            # Print all the items and their values in the context
-            for item in dpg.get_all_items():
-                print(item, type(item), dpg.get_value(item))
-            # Update the output container text with the dataset path
+
+            # Update the dataset name
             self.dataset_name = path.basename(self.dataset_path)
+            
+            # Update the current dataset name displayed on the data container
             dpg.set_value("current_dataset_name", f"Current dataset: {self.dataset_name}")
         
         def preprocess_data_cb():
@@ -41,7 +54,7 @@ class GUI:
         def collect_data_cb():
             print("Collecting data")
 
-        with dpg.file_dialog(directory_selector=False, show=False, callback=callback, tag="data_file_dialog_tag", width=700 ,height=400):
+        with dpg.file_dialog(directory_selector=False, show=False, callback=file_dialog_cb, tag="data_file_dialog_tag", width=700 ,height=400):
             #dpg.add_file_extension(".*")
             dpg.add_file_extension("", color=(150, 150, 255, 255))
             dpg.add_file_extension(".csv", color=(150, 255, 150, 255))
@@ -55,7 +68,7 @@ class GUI:
             dpg.add_button(label="Load", callback=lambda: dpg.show_item("data_file_dialog_tag"))
             dpg.add_button(label="Preprocess", callback=preprocess_data_cb)
             dpg.add_button(label="Collect", callback=collect_data_cb)
-            dpg.add_text(f"Current dataset: {self.dataset_name}", label="output_text", tag="current_dataset_name", wrap=300)
+            dpg.add_text(f"Current dataset: {self.dataset_name}", label="output_text", tag="current_dataset_name", wrap=self.viewport_width//4)
 
     def add_model_container(self):
         def callback(sender, app_data):
