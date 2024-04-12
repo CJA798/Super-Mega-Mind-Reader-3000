@@ -40,6 +40,5 @@ class DatasetHandler():
         try:
             # Load the dataset
             self.raw_dataset = read_csv(file_path)
-            print(self.raw_dataset)
         except Exception as e:
             raise ValueError(f"An error occurred while loading the dataset: {e}")
