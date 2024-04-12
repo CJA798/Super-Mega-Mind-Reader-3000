@@ -1,7 +1,9 @@
 import dearpygui.dearpygui as dpg
 from os import path
 from data.dataset_handler import DatasetHandler
+from data.data_collector import DataCollector
 import os
+import numpy as np
 class GUI:
     def __init__(self):
         # Initialize the dearpygui context
@@ -27,6 +29,19 @@ class GUI:
         
 
     def add_data_container(self):
+        def collect_data_cb(sender: str, app_data: dict)->None:
+            print("Connecting to BCI headset...")
+            dc = DataCollector()
+            dc.print_device_info()
+
+            print("\nStarting data collection...")
+            #data = dc.start_streaming()
+            #print(data)
+            # update output plot
+            # create a tuple of random data
+            rand_data = np.random.rand(10)
+            dpg.set_value("output_plot", rand_data)
+
         def file_dialog_cb(sender: str, app_data: dict)->None:
             '''
             Callback function for the file dialog in the data container.
@@ -124,7 +139,7 @@ class GUI:
             
             def _log(sender, app_data):
                 pass
-            dpg.add_button(label="Collect", callback=_log, tag="collect_data_button")
+            dpg.add_button(label="Collect", callback=collect_data_cb, tag="collect_data_button")
             with dpg.collapsing_header(label="Load"):
                 dpg.add_button(label="Load", callback=load_data_cb, tag="load_data_button")
     
@@ -190,8 +205,12 @@ class GUI:
                         pos=(self.viewport_width//3, 0),
                         no_close=True,
                         no_move=True,
-                        no_resize=True):
+                        no_resize=True,
+                        tag="output_window"):
             dpg.add_text("Output goes here", label="output_text")
+            data = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+            dpg.add_simple_plot(label="Frame Times", default_value=data, tag="output_plot")
+            dpg.add_simple_plot(label="Reversed Frame Times", default_value=data[::-1], tag="reversed_output_plot")
         
     def run(self):
         dpg.setup_dearpygui()
