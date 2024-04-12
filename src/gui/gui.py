@@ -35,12 +35,18 @@ class GUI:
             dc.print_device_info()
 
             print("\nStarting data collection...")
-            #data = dc.start_streaming()
-            #print(data)
-            # update output plot
-            # create a tuple of random data
-            rand_data = np.random.rand(10)
-            dpg.set_value("output_plot", rand_data)
+            dc.start_streaming()
+
+            for _ in range(25000):
+                channel_data = dc.get_data()
+                try:
+                    for ch in range(1,9):
+                        dpg.set_value(f"channel_{ch}_plot", list(channel_data[ch]))
+                except:
+                    pass
+
+            print("\nStopping data collection...")
+            dc.stop_streaming()
 
         def file_dialog_cb(sender: str, app_data: dict)->None:
             '''
@@ -208,9 +214,24 @@ class GUI:
                         no_resize=True,
                         tag="output_window"):
             dpg.add_text("Output goes here", label="output_text")
-            data = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-            dpg.add_simple_plot(label="Frame Times", default_value=data, tag="output_plot")
-            dpg.add_simple_plot(label="Reversed Frame Times", default_value=data[::-1], tag="reversed_output_plot")
+            
+            for i in range(1, 9, 2):
+                with dpg.group(horizontal=True):
+                    dpg.add_text((f"Channel {i}"), tag=f"channel_{i}_text")
+                    dpg.add_text((f"Channel {i+1}"), tag=f"channel_{i+1}_text", indent=self.viewport_width//3-30)
+                with dpg.group(horizontal=True):
+                    dpg.add_simple_plot(default_value=[0,0],
+                                        tag=f"channel_{i}_plot",
+                                        width=self.viewport_width//3-40,
+                                        height=self.viewport_height//12,
+                                        )
+                    
+                    dpg.add_simple_plot(default_value=[0,0],
+                                        tag=f"channel_{i+1}_plot",
+                                        width=self.viewport_width//3-40,
+                                        height=self.viewport_height//12,
+                                        )
+
         
     def run(self):
         dpg.setup_dearpygui()

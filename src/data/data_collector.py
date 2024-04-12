@@ -1,6 +1,10 @@
 import serial.tools.list_ports
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds, BrainFlowPresets
+from brainflow.data_filter import DataFilter
 from time import sleep
+import pandas as pd
+import numpy as np
+
 class DataCollector():
     def __init__(self):
         '''
@@ -34,9 +38,27 @@ class DataCollector():
     def start_streaming(self):
         self.board.prepare_session()
         self.board.start_stream()
-        sleep(1)
-        # data = board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
-        data = self.board.get_board_data()  # get all data and remove it from internal buffer
+
+    def get_data(self):
+        data = self.board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
+        #data = self.board.get_board_data()  # get all data and remove it from internal buffer
+
+        # demo how to convert it to pandas DF and plot data
+        eeg_channels = BoardShim.get_eeg_channels(BoardIds.CYTON_BOARD.value)
+        df = pd.DataFrame(np.transpose(data))
+        #print('Data From the Board')
+        #print(df.head(10))
+
+        channel_data = df[eeg_channels]
+        #print('Data from Channels')
+        #print(channel_data.head(10))
+
+        # demo for data serialization using brainflow API, we recommend to use it instead pandas.to_csv()
+        #DataFilter.write_file(data, 'test.csv', 'w')  # use 'a' for append mode
+    
+        return channel_data
+    
+    def stop_streaming(self):
         self.board.stop_stream()
         self.board.release_session()
     
