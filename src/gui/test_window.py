@@ -13,12 +13,13 @@ def test_window():
     dpg.start_dearpygui()
     dpg.destroy_context()
 
-def demo_():
-    # Path to the script you want to run
+def demo_(queue):
+    # Do your work here
     script_path = os.path.join(os.path.dirname(__file__), "test_window.py")
     print(script_path)
-
     subprocess.run(f"python {script_path}", shell=True)
+    queue.put(True)  # Signal that the loop has stopped
+    
             
 
 

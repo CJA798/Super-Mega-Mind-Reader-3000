@@ -33,33 +33,37 @@ class GUI:
 
     def add_data_container(self):
         def collect_data_cb(sender: str, app_data: dict)->None:
-            
-
-            
-            
-            # Run the script
-            p1 = mp.Process(target=demo_)
-            p2 = mp.Process(target=print, args=("Hello"))
-
-            p1.start()
-            p2.start()
-
-            
             print("Connecting to BCI headset...")
             dc = DataCollector()
             dc.print_device_info()
 
             print("\nStarting data collection...")
-            dc.start_streaming()
+            try:
+                dc.start_streaming()
+            except:
+                print("Failed to start streaming. Please check the headset connection.")
+                return
 
-            # Collect data for about 10 min (25000 iterations)
-            for _ in range(250):
+            queue = mp.Queue()
+            
+            # Run the script
+            p1 = mp.Process(target=demo_, args=(queue,))
+            p2 = mp.Process(target=print, args=("Hello"), daemon=True)
+
+            p1.start()
+            p2.start()
+
+            # Collect data until the experiment is done
+            experiment_done = False
+            while not experiment_done:
                 channel_data = dc.get_current_board_data()
                 try:
                     for ch in range(1,9):
                         dpg.set_value(f"channel_{ch}_plot", list(channel_data[ch]))
+                    experiment_done = queue.get_nowait()
                 except:
                     pass
+                
             
             dataset = dc.get_board_data()
             print("\nStopping data collection...")
