@@ -4,6 +4,7 @@ from brainflow.data_filter import DataFilter
 from time import sleep
 import pandas as pd
 import numpy as np
+from dearpygui.dearpygui import set_value
 
 class DataCollector():
     def __init__(self):
@@ -68,7 +69,26 @@ class DataCollector():
     def stop_streaming(self):
         self.board.stop_stream()
         self.board.release_session()
-    
+
+    def collect_data(self):
+        self.print_device_info()
+        print("\nStarting data collection...")
+        self.start_streaming()
+
+        # Collect data for about 10 min (25000 iterations)
+        for _ in range(250):
+            channel_data = self.get_current_board_data()
+            try:
+                for ch in range(1,9):
+                    set_value(f"channel_{ch}_plot", list(channel_data[ch]))
+            except:
+                pass
+        
+        dataset = self.get_board_data()
+        print("\nStopping data collection...")
+        self.stop_streaming()
+
+
     def print_device_info(self):
         '''
         Print the information of the BCI headset.

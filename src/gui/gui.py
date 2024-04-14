@@ -3,7 +3,9 @@ from os import path
 from data.dataset_handler import DatasetHandler
 from data.data_collector import DataCollector
 import os
-
+import multiprocessing as mp
+import subprocess
+from gui.test_window import demo_
 
 class GUI:
     def __init__(self):
@@ -31,16 +33,18 @@ class GUI:
 
     def add_data_container(self):
         def collect_data_cb(sender: str, app_data: dict)->None:
-            #import subprocess
+            
 
-            # Path to the script you want to run
-            #script_path = os.path.join(os.path.dirname(__file__), "test_window.py")
-            #print(script_path)
-
+            
+            
             # Run the script
-            #subprocess.run(f"poetry shell && python {script_path}", shell=True)
-            #return
+            p1 = mp.Process(target=demo_)
+            p2 = mp.Process(target=print, args=("Hello"))
 
+            p1.start()
+            p2.start()
+
+            
             print("Connecting to BCI headset...")
             dc = DataCollector()
             dc.print_device_info()
@@ -49,7 +53,7 @@ class GUI:
             dc.start_streaming()
 
             # Collect data for about 10 min (25000 iterations)
-            for _ in range(25000):
+            for _ in range(250):
                 channel_data = dc.get_current_board_data()
                 try:
                     for ch in range(1,9):
@@ -60,6 +64,10 @@ class GUI:
             dataset = dc.get_board_data()
             print("\nStopping data collection...")
             dc.stop_streaming()
+
+            p1.join()
+            p2.join()
+
 
         def file_dialog_cb(sender: str, app_data: dict)->None:
             '''
