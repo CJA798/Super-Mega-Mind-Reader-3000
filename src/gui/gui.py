@@ -3,10 +3,7 @@ from os import path
 from data.dataset_handler import DatasetHandler
 from data.data_collector import DataCollector
 import os
-import numpy as np
-from time import sleep
-import multiprocessing as mp
-from gui.test_window import test_window
+
 
 class GUI:
     def __init__(self):
@@ -170,12 +167,20 @@ class GUI:
             
             with dpg.collapsing_header(label="Preprocess"):
                 dpg.add_button(label="Preprocess", callback=_log)
-                with dpg.group(horizontal=True):
-                    dpg.add_checkbox(label="A", callback=_log, default_value=True)
-                    dpg.add_checkbox(label="B", callback=_log, default_value=True)
-                    dpg.add_checkbox(label="C", callback=_log, default_value=True)
-                    dpg.add_checkbox(label="D", callback=_log, default_value=True)
-            
+                with dpg.tab_bar():
+                            with dpg.tab(label="Preset"):
+                                dpg.add_text("This is the preset tab!")
+                                dpg.add_radio_button(("O'Neill", "Preset A", "Preset B"))
+                            
+                            with dpg.tab(label="Custom"):
+                                dpg.add_text("This is the custom tab!")
+
+                                with dpg.group(horizontal=True):
+                                    dpg.add_checkbox(label="A", callback=_log, default_value=True)
+                                    dpg.add_checkbox(label="B", callback=_log, default_value=True)
+                                    dpg.add_checkbox(label="C", callback=_log, default_value=True)
+                                    dpg.add_checkbox(label="D", callback=_log, default_value=True)
+                            
             
             with dpg.collapsing_header(label="Info", default_open=True):
                 raw_dataset_name = path.basename(self.dataset_handler.raw_dataset_path) if self.dataset_handler.raw_dataset_path else None
