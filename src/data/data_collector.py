@@ -39,7 +39,7 @@ class DataCollector():
         self.board.prepare_session()
         self.board.start_stream()
 
-    def get_data(self):
+    def get_current_board_data(self):
         data = self.board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
         #data = self.board.get_board_data()  # get all data and remove it from internal buffer
 
@@ -54,9 +54,16 @@ class DataCollector():
         #print(channel_data.head(10))
 
         # demo for data serialization using brainflow API, we recommend to use it instead pandas.to_csv()
-        #DataFilter.write_file(data, 'test.csv', 'w')  # use 'a' for append mode
+        DataFilter.write_file(data, 'partial_dataset.csv', 'w')  # use 'a' for append mode
     
         return channel_data
+    
+    def get_board_data(self):
+        data = self.board.get_board_data()  # get all data and remove it from internal buffer
+        df = pd.DataFrame(np.transpose(data))
+        DataFilter.write_file(data, 'full_dataset.csv', 'w')  # use 'a' for append mode
+    
+        return df
     
     def stop_streaming(self):
         self.board.stop_stream()

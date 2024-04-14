@@ -4,6 +4,10 @@ from data.dataset_handler import DatasetHandler
 from data.data_collector import DataCollector
 import os
 import numpy as np
+from time import sleep
+import multiprocessing as mp
+from gui.test_window import test_window
+
 class GUI:
     def __init__(self):
         # Initialize the dearpygui context
@@ -30,6 +34,16 @@ class GUI:
 
     def add_data_container(self):
         def collect_data_cb(sender: str, app_data: dict)->None:
+            #import subprocess
+
+            # Path to the script you want to run
+            #script_path = os.path.join(os.path.dirname(__file__), "test_window.py")
+            #print(script_path)
+
+            # Run the script
+            #subprocess.run(f"poetry shell && python {script_path}", shell=True)
+            #return
+
             print("Connecting to BCI headset...")
             dc = DataCollector()
             dc.print_device_info()
@@ -37,14 +51,16 @@ class GUI:
             print("\nStarting data collection...")
             dc.start_streaming()
 
+            # Collect data for about 10 min (25000 iterations)
             for _ in range(25000):
-                channel_data = dc.get_data()
+                channel_data = dc.get_current_board_data()
                 try:
                     for ch in range(1,9):
                         dpg.set_value(f"channel_{ch}_plot", list(channel_data[ch]))
                 except:
                     pass
-
+            
+            dataset = dc.get_board_data()
             print("\nStopping data collection...")
             dc.stop_streaming()
 
