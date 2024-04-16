@@ -280,8 +280,13 @@ class GUI:
             dpg.configure_item(sender, enabled=False)
 
             print("Starting data collection...")
-            print("classes: ", args.classes[0])
-            for class_ in args.classes[0]:
+            print(args)
+            classes = args.classes
+            if not classes:
+                classes = ["Move", "Relax"]
+            print("classes: ", classes)
+
+            for class_ in classes:
                 print(f"Perform action for class {class_}")
                 # Set cue button text to class name
                 dpg.set_item_label(sender, class_)
