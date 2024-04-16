@@ -6,6 +6,8 @@ import os
 import multiprocessing as mp
 import subprocess
 from gui.test_window import demo_
+from numpy import random
+import time
 
 class GUI:
     def __init__(self):
@@ -29,7 +31,14 @@ class GUI:
                             height=self.viewport_height,
                             small_icon=self.icon_path,
                             large_icon=self.icon_path)
-        
+    
+    def setup_subject_gui(self, args):
+        self.add_experiment_container(args)
+        dpg.create_viewport(title="Super Mega Mind Reader 3000",
+                            width=self.viewport_width,
+                            height=self.viewport_height,
+                            small_icon=self.icon_path,
+                            large_icon=self.icon_path)
 
     def add_data_container(self):
         def collect_data_cb(sender: str, app_data: dict)->None:
@@ -265,7 +274,50 @@ class GUI:
                                         height=self.viewport_height//12,
                                         )
 
-        
+    def add_experiment_container(self, args):
+        def cue_button_cb(sender, app_data):
+            # Disable the button to avoid re-triggering the callback
+            dpg.configure_item(sender, enabled=False)
+
+            print("Starting data collection...")
+            print("classes: ", args.classes[0])
+            for class_ in args.classes[0]:
+                print(f"Perform action for class {class_}")
+                # Set cue button text to class name
+                dpg.set_item_label(sender, class_)
+                # Wait for cue period
+                start_time = time.time()
+                current_time = time.time()
+                while current_time - start_time < args.cue_period:
+                    current_time = time.time()
+            
+
+
+        with dpg.window(label="Experiment",
+                        width=self.viewport_width,
+                        height=self.viewport_height,
+                        no_close=True,
+                        no_move=True,
+                        no_background=True,
+                        no_scrollbar=True,
+                        no_title_bar=True,
+                        autosize=True,
+                        tag="experiment_window",
+                        user_data=args
+                        ):
+            instructions = '''
+                                Welcome!
+
+In this experiment, you will be asked to perform different actions at specific cues.
+
+                          ... bla bla bla ...'''
+
+            dpg.add_button(label=instructions,
+                           width=self.viewport_width-20,
+                           height=self.viewport_height-20,
+                           tag="cue_button",
+                           callback=cue_button_cb)
+
     def run(self):
         dpg.setup_dearpygui()
         dpg.show_viewport()
