@@ -8,6 +8,7 @@ import subprocess
 from gui.test_window import demo_
 from numpy import random
 import time
+import sys
 
 class GUI:
     def __init__(self):
@@ -33,6 +34,7 @@ class GUI:
                             large_icon=self.icon_path)
     
     def setup_subject_gui(self, args):
+        print(f'args @ setup_subject_gui: {args}')
         self.add_experiment_container(args)
         dpg.create_viewport(title="Super Mega Mind Reader 3000",
                             width=self.viewport_width,
@@ -52,6 +54,9 @@ class GUI:
             class_list = [class_ for class_ in class_list if class_]
             # Remove duplicates
             class_list = list(set(class_list))
+
+            # Get the cue period from the input text
+            cue_period = dpg.get_value("cue_period_input_text")
 
             # Connect to the BCI headset if available
             print("Connecting to BCI headset...")
@@ -73,11 +78,14 @@ class GUI:
             queue = mp.Queue()
             
             # Run the script
-            p1 = mp.Process(target=demo_, args=(queue,))
-            p2 = mp.Process(target=print, args=("Hello"), daemon=True)
+            #p1 = mp.Process(target=demo_, args=(queue,))
+            #p2 = mp.Process(target=print, args=("Hello"), daemon=True)
+            print(f"pre: {class_list} {cue_period}")
+            p3 = mp.Process(target=self.run_subject_gui, args=(queue, class_list, cue_period))
 
-            p1.start()
-            p2.start()
+            #p1.start()
+            #p2.start()
+            p3.start()
 
             # Collect data until the experiment is done
             experiment_done = False
@@ -95,8 +103,9 @@ class GUI:
             print("\nStopping data collection...")
             dc.stop_streaming()
 
-            p1.join()
-            p2.join()
+            #p1.join()
+            #p2.join()
+            p3.join()
 
 
         def file_dialog_cb(sender: str, app_data: dict)->None:
@@ -192,14 +201,12 @@ class GUI:
                         height=self.viewport_height//2,
                         no_close=True,
                         no_move=True,
-                        no_resize=True):
+                        no_resize=True,
+                        no_background=False):
             
             def _log(sender, app_data):
                 pass
 
-            def test_classes(sender, app_data):
-                pass
-                #print("Classes: ", app_data)
 
             with dpg.collapsing_header(label="Collect"):
                 default_classes = ["Move", "Relax"]
@@ -208,10 +215,15 @@ class GUI:
                 dpg.add_text("Class list:")
                 dpg.add_input_text(default_value=default_class_list,
                                    multiline=True,
-                                   height=80, width=self.viewport_width//5,
-                                   callback=test_classes,
+                                   height=80,
+                                   no_spaces=True,
                                    tab_input=True,
                                    tag="class_input_text")
+                dpg.add_text("Cue period:")
+                dpg.add_input_text(label="Seconds",
+                                   decimal=True,
+                                   tag="cue_period_input_text")
+
 
             with dpg.collapsing_header(label="Load"):
                 dpg.add_button(label="Load", callback=load_data_cb, tag="load_data_button")
@@ -273,7 +285,8 @@ class GUI:
                         pos=(0, self.viewport_height//2),
                         no_close=True,
                         no_move=True,
-                        no_resize=True):
+                        no_resize=True,
+                        no_background=False):
             dpg.add_button(label="Load", callback=lambda: dpg.show_item("model_file_dialog_tag"))
             dpg.add_button(label="Train", callback=train_model_cb)
             dpg.add_button(label="Test", callback=test_model_cb)
@@ -287,6 +300,7 @@ class GUI:
                         no_close=True,
                         no_move=True,
                         no_resize=True,
+                        no_background=False,
                         tag="output_window"):
             dpg.add_text("Output goes here", label="output_text")
             
@@ -317,7 +331,9 @@ class GUI:
             classes = args.classes
             if not classes:
                 classes = ["Move", "Relax"]
-            print("classes: ", classes)
+            else:
+                classes = classes[0]
+            print("classes @ cue_button_cb: ", classes)
 
             for class_ in classes:
                 print(f"Perform action for class {class_}")
@@ -328,7 +344,8 @@ class GUI:
                 current_time = time.time()
                 while current_time - start_time < args.cue_period:
                     current_time = time.time()
-            
+            # Finish the program
+            sys.exit()
 
 
         with dpg.window(label="Experiment",
@@ -361,3 +378,18 @@ In this experiment, you will be asked to perform different actions at specific c
         dpg.show_viewport()
         dpg.start_dearpygui()
         dpg.destroy_context()
+
+    def run_subject_gui(self, queue, class_list=None, cue_period=None):
+        # Set the class list and cue period to default values if not provided
+        if not class_list:
+            class_list = ["Move", "Relax"]
+        if not cue_period:
+            cue_period = 5.0
+        
+        script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "subject_gui.py")
+        print(script_path)
+        formatted_class_list = " ".join(class_list)
+        print(f"python {script_path} --classes {formatted_class_list} --cue-period={cue_period}")
+        subprocess.run(f"python -u {script_path} --classes {formatted_class_list} --cue-period={cue_period}", shell=True)
+        queue.put(True)  # Signal that the loop has stopped
+    

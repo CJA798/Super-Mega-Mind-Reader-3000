@@ -20,14 +20,15 @@ except:
     parser.print_help()
     sys.exit(0)
 
-def main(args: argparse.Namespace = args) -> None:
+def main(args: argparse.Namespace) -> None:
     '''
     Main function to run the application.
     '''
+    print(f'args @ main: {args}')
     app = GUI()
     app.setup_subject_gui(args)
     app.run()
     
 
 if __name__ == '__main__':
-    main(args=args)
+    main(args)
