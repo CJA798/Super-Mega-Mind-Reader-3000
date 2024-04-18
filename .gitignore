@@ -12,6 +12,8 @@
 /src/gui/__pycache__/
 /src/data/__pycache__/
 /src/data/logs
+full_dataset.csv
+partial_dataset.csv
 
 
 /data/
