@@ -31,16 +31,16 @@ class DataCollector():
                 return port
         return None
     
-    def connect_to_BCI_headset(self):
+    def connect_to_BCI_headset(self) -> BoardShim:
         params = BrainFlowInputParams()
         params.serial_port = self.port.device
         return BoardShim(BoardIds.CYTON_BOARD, params)
     
-    def start_streaming(self):
+    def start_streaming(self) -> None:
         self.board.prepare_session()
         self.board.start_stream()
 
-    def get_current_board_data(self):
+    def get_current_board_data(self) -> pd.DataFrame:
         data = self.board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
         #data = self.board.get_board_data()  # get all data and remove it from internal buffer
 
@@ -59,14 +59,14 @@ class DataCollector():
     
         return channel_data
     
-    def get_board_data(self):
+    def get_board_data(self) -> pd.DataFrame:
         data = self.board.get_board_data()  # get all data and remove it from internal buffer
         df = pd.DataFrame(np.transpose(data))
         DataFilter.write_file(data, 'full_dataset.csv', 'w')  # use 'a' for append mode
     
         return df
     
-    def stop_streaming(self):
+    def stop_streaming(self) -> None:
         self.board.stop_stream()
         self.board.release_session()
 
@@ -89,7 +89,7 @@ class DataCollector():
         self.stop_streaming()
 
 
-    def print_device_info(self):
+    def print_device_info(self) -> None:
         '''
         Print the information of the BCI headset.
         '''
