@@ -42,6 +42,19 @@ class GUI:
 
     def add_data_container(self):
         def collect_data_cb(sender: str, app_data: dict)->None:
+            # Get the classes from the input text
+            class_input_text = dpg.get_value("class_input_text")
+            # Remove spaces
+            class_list = class_input_text.replace(" ", "")
+            # Remove empty lines
+            class_list = class_list.split("\n")
+            # Remove empty strings
+            class_list = [class_ for class_ in class_list if class_]
+            # Remove duplicates
+            class_list = list(set(class_list))
+
+            print("app_data: ", class_list)
+            return
             print("Connecting to BCI headset...")
             dc = DataCollector()
             dc.print_device_info()
@@ -180,15 +193,19 @@ class GUI:
             def _log(sender, app_data):
                 pass
 
+            def test_classes(sender, app_data):
+                pass
+                #print("Classes: ", app_data)
+
             with dpg.collapsing_header(label="Collect"):
-                dpg.add_button(label="Collect", callback=collect_data_cb, tag="collect_data_button")
-                dpg.add_text("Class list:")
                 default_classes = ["Move", "Relax"]
                 default_class_list = "\n".join(default_classes)
+                dpg.add_button(label="Collect", callback=collect_data_cb, tag="collect_data_button")
+                dpg.add_text("Class list:")
                 dpg.add_input_text(default_value=default_class_list,
                                    multiline=True,
                                    height=80, width=self.viewport_width//5,
-                                   callback=_log,
+                                   callback=test_classes,
                                    tab_input=True,
                                    tag="class_input_text")
 
