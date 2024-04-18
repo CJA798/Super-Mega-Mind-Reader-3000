@@ -53,13 +53,17 @@ class GUI:
             # Remove duplicates
             class_list = list(set(class_list))
 
-            print("app_data: ", class_list)
-            return
+            # Connect to the BCI headset if available
             print("Connecting to BCI headset...")
             dc = DataCollector()
+            if not dc.port or not dc.board:
+                print("BCI headset not found. Please check the connection.")
+                return
             dc.print_device_info()
 
             print("\nStarting data collection...")
+
+            # Start streaming data if the headset is connected
             try:
                 dc.start_streaming()
             except:

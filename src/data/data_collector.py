@@ -32,9 +32,13 @@ class DataCollector():
         return None
     
     def connect_to_BCI_headset(self) -> BoardShim:
-        params = BrainFlowInputParams()
-        params.serial_port = self.port.device
-        return BoardShim(BoardIds.CYTON_BOARD, params)
+        try:
+            params = BrainFlowInputParams()
+            params.serial_port = self.port.device
+            return BoardShim(BoardIds.CYTON_BOARD, params)
+        except:
+            print('Could not connect to the BCI headset.')
+            return None
     
     def start_streaming(self) -> None:
         self.board.prepare_session()
