@@ -3,6 +3,8 @@
 full_dataset.csv
 partial_dataset.csv
 TODO.txt
+merged_dataset.csv
+class_timestamps.csv
 
 /img/Cover.psd
 /img/icon.png

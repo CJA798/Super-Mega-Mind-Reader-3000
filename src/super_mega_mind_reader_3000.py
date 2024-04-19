@@ -12,6 +12,7 @@ def main():
     
 
 if __name__ == '__main__':
+    # Run the main function
     try:
         main()
     except Exception as e:

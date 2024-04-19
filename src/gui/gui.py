@@ -12,39 +12,74 @@ import sys
 import pandas as pd
 
 class GUI:
-    def __init__(self):
+    '''
+    Class to handle the GUI of the application.
+    '''
+    def __init__(self) -> None:
+        '''
+        Constructor of the GUI class.
+        '''
         # Initialize the dearpygui context
         dpg.create_context()
-        #dpg.show_style_editor()
 
+        # Set the viewport size
         self.viewport_width = 800
         self.viewport_height = 600
+
+        # Set the icon path
         self.icon_path = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "img"), "icon.ico")
 
         # Initialize the dataset handler
         self.dataset_handler = DatasetHandler()
         
-    def setup_gui(self):
+    def setup_gui(self) -> None:
+        '''
+        Setup the GUI of the application.
+        '''
+        # Add containers
         self.add_data_container()
         self.add_model_container()
         self.add_output_container()
+
+        # Create the viewport
         dpg.create_viewport(title="Super Mega Mind Reader 3000",
                             width=self.viewport_width,
                             height=self.viewport_height,
                             small_icon=self.icon_path,
                             large_icon=self.icon_path)
     
-    def setup_subject_gui(self, args):
-        print(f'args @ setup_subject_gui: {args}')
+    def setup_subject_gui(self, args) -> None:
+        '''
+        Setup the GUI of the application for the subject.
+        '''
+        # Add experiment container
         self.add_experiment_container(args)
-        dpg.create_viewport(title="Super Mega Mind Reader 3000",
+
+        # Create the viewport
+        dpg.create_viewport(title="Super Mega Mind Reader 3000 (Experiment Mode)",
                             width=self.viewport_width,
                             height=self.viewport_height,
                             small_icon=self.icon_path,
                             large_icon=self.icon_path)
 
     def add_data_container(self):
+        '''
+        Add the data container to the GUI.
+        '''
         def collect_data_cb(sender: str, app_data: dict)->None:
+            '''
+            Callback function for the collect data button in the data container.
+
+            args:
+                sender (str): The sender of the callback.
+                app_data (dict): The data passed to the callback.
+
+            returns:
+                None
+
+            raises:
+                None
+            ''' 
             # Get the classes from the input text
             class_input_text = dpg.get_value("class_input_text")
             # Remove spaces
@@ -76,25 +111,27 @@ class GUI:
                 print("Failed to start streaming. Please check the headset connection.")
                 return
 
+            # Create a queue to communicate with the subject GUI
             queue = mp.Queue()
             
-            # Run the script
-            #p1 = mp.Process(target=demo_, args=(queue,))
-            #p2 = mp.Process(target=print, args=("Hello"), daemon=True)
+            # Run the script in a separate process
             print(f"pre: {class_list} {cue_period}")
-            p3 = mp.Process(target=self.run_subject_gui, args=(queue, class_list, cue_period))
+            subject_gui_process = mp.Process(target=self.run_subject_gui, args=(queue, class_list, cue_period))
 
-            #p1.start()
-            #p2.start()
-            p3.start()
+            # Start the subject GUI process
+            subject_gui_process.start()
 
             # Collect data until the experiment is done
             experiment_done = False
             while not experiment_done:
+                # Get the current data from the board (last 254 packages)
                 channel_data = dc.get_current_board_data()
                 try:
+                    # Update the plots with the new data
                     for ch in range(1,9):
                         dpg.set_value(f"channel_{ch}_plot", list(channel_data[ch]))
+                    
+                    # Check if the experiment is done
                     experiment_done = queue.get_nowait()
                 except:
                     pass
@@ -110,6 +147,7 @@ class GUI:
             class_df_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'class_timestamps.csv')
             # Load the class timestamps file
             class_df = pd.read_csv(class_df_path, on_bad_lines='warn')
+
             # Drop unnecessary columns from the sensor dataset
             dataset = dataset.iloc[:, list(range(1, 9)) + [-2]]
             # Add headers
@@ -117,23 +155,14 @@ class GUI:
 
             # Merge the sensor data dataset with the class timestamps
             merged_df = pd.merge_asof(dataset, class_df, on='Timestamp', direction='nearest')
-            
             # Drop the rows with Class = Instructions
             merged_df = merged_df[merged_df['Class'] != 'Instructions']
             
-            
             # Save the dataset to a CSV file
             merged_df.to_csv("merged_dataset.csv", index=False)
-
             
-            print(merged_df.head(10))
-
-
-
-
-            #p1.join()
-            #p2.join()
-            p3.join()
+            # Wait for the subject GUI process to finish
+            subject_gui_process.join()
 
 
         def file_dialog_cb(sender: str, app_data: dict)->None:
@@ -290,6 +319,9 @@ class GUI:
 
 
     def add_model_container(self):
+        '''
+        Add the model container to the GUI.
+        '''
         def callback(sender, app_data):
             self.model_path = app_data['file_path_name']
             print("Loaded Model Path: ", self.model_path)
@@ -321,6 +353,9 @@ class GUI:
             dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0)
             
     def add_output_container(self):
+        '''
+        Add the output container to the GUI.
+        '''
         with dpg.window(label="Output",
                         width=self.viewport_width*2//3,
                         height=self.viewport_height,
