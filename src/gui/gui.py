@@ -9,6 +9,7 @@ from gui.test_window import demo_
 from numpy import random
 import time
 import sys
+import pandas as pd
 
 class GUI:
     def __init__(self):
@@ -335,7 +336,12 @@ class GUI:
                 classes = classes[0]
             print("classes @ cue_button_cb: ", classes)
 
+            # Initialize the dataframe that holds the current class and the timestamp
+            class_df = pd.DataFrame(columns=["Class", "Timestamp"])
+            start_time = time.time()
             for class_ in classes:
+                # Add the class and the timestamp in unix time to the dataframe
+                class_df.loc[len(class_df.index)] = [class_, time.time()]
                 print(f"Perform action for class {class_}")
                 # Set cue button text to class name
                 dpg.set_item_label(sender, class_)
@@ -344,6 +350,9 @@ class GUI:
                 current_time = time.time()
                 while current_time - start_time < args.cue_period:
                     current_time = time.time()
+
+            # Save the dataframe to a csv file
+            class_df.to_csv(f"class_timestamps_{start_time}.csv", index=False)
             # Finish the program
             sys.exit()
 
@@ -386,10 +395,15 @@ In this experiment, you will be asked to perform different actions at specific c
         if not cue_period:
             cue_period = 5.0
         
+        # Set the command to run the script
         script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "subject_gui.py")
-        print(script_path)
         formatted_class_list = " ".join(class_list)
-        print(f"python {script_path} --classes {formatted_class_list} --cue-period={cue_period}")
-        subprocess.run(f"python -u {script_path} --classes {formatted_class_list} --cue-period={cue_period}", shell=True)
-        queue.put(True)  # Signal that the loop has stopped
+        flags = '-u'
+        command = f"python {flags} {script_path} --classes {formatted_class_list} --cue-period={cue_period}"
+        
+        # Run the script
+        subprocess.run(command, shell=True)
+
+        # Signal that the experiment has stopped
+        queue.put(True)  
     

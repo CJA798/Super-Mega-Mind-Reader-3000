@@ -1,5 +1,8 @@
 /venv/
 
+full_dataset.csv
+partial_dataset.csv
+TODO.txt
 
 /img/Cover.psd
 /img/icon.png
@@ -12,8 +15,7 @@
 /src/gui/__pycache__/
 /src/data/__pycache__/
 /src/data/logs
-full_dataset.csv
-partial_dataset.csv
+
 
 
 /data/
