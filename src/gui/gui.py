@@ -99,10 +99,37 @@ class GUI:
                 except:
                     pass
                 
-            
+            # Get run dataset
             dataset = dc.get_board_data()
+
+            # Stop streaming data
             print("\nStopping data collection...")
             dc.stop_streaming()
+
+            # Get the path to the class timestamps file
+            class_df_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'class_timestamps.csv')
+            # Load the class timestamps file
+            class_df = pd.read_csv(class_df_path, on_bad_lines='warn')
+            # Drop unnecessary columns from the sensor dataset
+            dataset = dataset.iloc[:, list(range(1, 9)) + [-2]]
+            # Add headers
+            dataset.columns = [f'Channel {n}' for n in range(1, 9)] + ['Timestamp']
+
+            # Merge the sensor data dataset with the class timestamps
+            merged_df = pd.merge_asof(dataset, class_df, on='Timestamp', direction='nearest')
+            
+            # Drop the rows with Class = Instructions
+            merged_df = merged_df[merged_df['Class'] != 'Instructions']
+            
+            
+            # Save the dataset to a CSV file
+            merged_df.to_csv("merged_dataset.csv", index=False)
+
+            
+            print(merged_df.head(10))
+
+
+
 
             #p1.join()
             #p2.join()
@@ -327,6 +354,13 @@ class GUI:
             # Disable the button to avoid re-triggering the callback
             dpg.configure_item(sender, enabled=False)
 
+            # Initialize the dataframe that holds the current class and the timestamp
+            class_df = pd.DataFrame(columns=["Class", "Timestamp"])
+
+            # Store the timestamp after the instructions are done
+            # This will come handy later to remove any readings that were taken before the cues
+            class_df.loc[len(class_df.index)] = ["Instructions", time.time()]
+
             print("Starting data collection...")
             print(args)
             classes = args.classes
@@ -336,8 +370,6 @@ class GUI:
                 classes = classes[0]
             print("classes @ cue_button_cb: ", classes)
 
-            # Initialize the dataframe that holds the current class and the timestamp
-            class_df = pd.DataFrame(columns=["Class", "Timestamp"])
             start_time = time.time()
             for class_ in classes:
                 # Add the class and the timestamp in unix time to the dataframe
@@ -352,7 +384,7 @@ class GUI:
                     current_time = time.time()
 
             # Save the dataframe to a csv file
-            class_df.to_csv(f"class_timestamps_{start_time}.csv", index=False)
+            class_df.to_csv(f"class_timestamps.csv", index=False)
             # Finish the program
             sys.exit()
 
