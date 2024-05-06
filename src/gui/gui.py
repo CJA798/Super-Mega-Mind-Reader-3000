@@ -185,7 +185,7 @@ class GUI:
             self.dataset_handler.raw_dataset_path = app_data['file_path_name']
 
             # Load the dataset
-            self.dataset_handler.load_from_csv(self.dataset_handler.raw_dataset_path)
+            #self.dataset_handler.load_from_csv(self.dataset_handler.raw_dataset_path)
 
             # Update the current dataset name displayed on the data container
             dpg.set_value("current_raw_dataset_name", f"Raw Dataset: {path.basename(self.dataset_handler.raw_dataset_path)}")
@@ -244,6 +244,50 @@ class GUI:
                 dpg.show_item("load_data_folder_dialog")
             else:
                 raise ValueError("Invalid dataset type selected")
+            
+
+        def preprocess_preset_cb(sender: str, app_data: dict)->None:
+            '''
+            Callback function for the preprocess button in the data container.
+            This function preprocesses the dataset using the selected preset.
+
+            args:
+                sender (str): The sender of the callback.
+                app_data (dict): The data passed to the callback.
+
+            returns:
+                None
+
+            raises:
+                ValueError: If an invalid preset is selected.
+            '''
+            # Get the selected preset
+            preset = dpg.get_value("preprocess_preset_option")
+            if preset == "O'Neill":
+                # Get current timestamp
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                print("Preprocessing dataset using O'Neill's method...")
+                # Load the dataset as a dataframe
+                df = self.dataset_handler.load_csv_as_dataframe(self.dataset_handler.raw_dataset_path)
+
+                # Create a folder to store the processed dataset
+                store_folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "processed", f"oneill_{timestamp}")
+                print("store_folder_path: ", store_folder_path)
+                os.makedirs(store_folder_path, exist_ok=True)
+                
+                # Preprocess the dataset using O'Neill's method
+                self.dataset_handler.preprocess_oneill(df,
+                                                       window_size=64,
+                                                       overlap=0.25,
+                                                       store_folder=store_folder_path,
+                                                       normalize=True)
+
+            elif preset == "Preset A":
+                print("Preprocessing dataset using Preset A...")
+            elif preset == "Preset B":
+                print("Preprocessing dataset using Preset B...")
+            else:
+                raise ValueError("Invalid preset selected")
 
 
         with dpg.file_dialog(directory_selector=False, show=False, callback=file_dialog_cb, tag="load_data_file_dialog", width=700 ,height=400):
@@ -289,13 +333,15 @@ class GUI:
                     dpg.add_radio_button(("Raw", "Train", "Test", "Valid"), horizontal=True, default_value="Raw", tag="load_radio_button")
             
             with dpg.collapsing_header(label="Preprocess"):
-                dpg.add_button(label="Preprocess", callback=_log)
+                
                 with dpg.tab_bar():
                             with dpg.tab(label="Preset"):
+                                dpg.add_button(label="Preprocess", callback=preprocess_preset_cb, tag="preprocess_preset_button")
                                 dpg.add_text("This is the preset tab!")
-                                dpg.add_radio_button(("O'Neill", "Preset A", "Preset B"))
+                                dpg.add_radio_button(("O'Neill", "Preset A", "Preset B"), tag="preprocess_preset_option", default_value="O'Neill")
                             
                             with dpg.tab(label="Custom"):
+                                dpg.add_button(label="Preprocess", callback=_log, tag="preprocess_custom_button")
                                 dpg.add_text("This is the custom tab!")
 
                                 with dpg.group(horizontal=True):
@@ -304,6 +350,7 @@ class GUI:
                                     dpg.add_checkbox(label="C", callback=_log, default_value=True)
                                     dpg.add_checkbox(label="D", callback=_log, default_value=True)
                             
+            
             
             with dpg.collapsing_header(label="Info", default_open=True):
                 raw_dataset_name = path.basename(self.dataset_handler.raw_dataset_path) if self.dataset_handler.raw_dataset_path else None
