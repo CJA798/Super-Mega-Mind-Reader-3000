@@ -9,8 +9,7 @@ import tifffile
 import time
 
 from scipy.stats import zscore
-
-
+from tqdm import tqdm
 
 
 class DatasetHandler():
@@ -119,7 +118,7 @@ class DatasetHandler():
             os.makedirs(folder_path, exist_ok=True)
 
             # Create and store TIFF images of the respective class
-            for index, n in enumerate(range(0, num_samples, step_size)):
+            for index, n in enumerate(tqdm(range(0, num_samples, step_size), desc=f"Processing {_class}", colour="green", unit="images")):
                 # Create the image
                 image = class_df['Spatial Matrix'].iloc[n: n+window_size]
                 image = np.stack(image)
