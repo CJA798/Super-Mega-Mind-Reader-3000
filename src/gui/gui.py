@@ -207,15 +207,15 @@ class GUI:
                 ValueError: If an invalid dataset type is loaded.
             '''
             # Update the respective dataset path and name displayed on the data container's info tab
-            if dpg.get_value("load_radio_button") == "Train":
+            if dpg.get_value("load_data_combo_box") == "Train":
                 self.dataset_handler.train_dataset_path = app_data['file_path_name']
                 dpg.set_value("current_train_dataset_name", f"Train Dataset: {path.basename(self.dataset_handler.train_dataset_path)}")
 
-            elif dpg.get_value("load_radio_button") == "Test":
+            elif dpg.get_value("load_data_combo_box") == "Test":
                 self.dataset_handler.test_dataset_path = app_data['file_path_name']
                 dpg.set_value("current_test_dataset_name", f"Test Dataset: {path.basename(self.dataset_handler.test_dataset_path)}")
                 
-            elif dpg.get_value("load_radio_button") == "Valid":
+            elif dpg.get_value("load_data_combo_box") == "Valid":
                 self.dataset_handler.validation_dataset_path = app_data['file_path_name']
                 dpg.set_value("current_validation_dataset_name", f"Validation Dataset: {path.basename(self.dataset_handler.validation_dataset_path)}")
 
@@ -238,9 +238,10 @@ class GUI:
                 ValueError: If an invalid dataset type is selected.
             '''
             # Show the respective file dialog based on the selected dataset type
-            if dpg.get_value("load_radio_button") == "Raw":
+            dataset_type = dpg.get_value("load_data_combo_box")
+            if dataset_type == "Raw":
                 dpg.show_item("load_data_file_dialog")
-            elif dpg.get_value("load_radio_button") == "Train" or dpg.get_value("load_radio_button") == "Test" or dpg.get_value("load_radio_button") == "Valid":
+            elif dpg.get_value("load_data_combo_box") == "Train" or dpg.get_value("load_data_combo_box") == "Test" or dpg.get_value("load_data_combo_box") == "Valid":
                 dpg.show_item("load_data_folder_dialog")
             else:
                 raise ValueError("Invalid dataset type selected")
@@ -289,6 +290,11 @@ class GUI:
             else:
                 raise ValueError("Invalid preset selected")
 
+        def load_data_combo_cb(sender: str, app_data: dict)->None:
+            print("Combo box selected: ", app_data)
+            # Get the current combo box value
+            combo_box_value = dpg.get_value("load_data_combo_box")
+            print("Combo box value: ", combo_box_value)
 
         with dpg.file_dialog(directory_selector=False, show=False, callback=file_dialog_cb, tag="load_data_file_dialog", width=700 ,height=400):
             dpg.add_file_extension("", color=(150, 150, 255, 255))
@@ -328,9 +334,10 @@ class GUI:
 
             with dpg.collapsing_header(label="Load"):
                 dpg.add_button(label="Load", callback=load_data_cb, tag="load_data_button")
-    
-                with dpg.group(horizontal=True):
-                    dpg.add_radio_button(("Raw", "Train", "Test", "Valid"), horizontal=True, default_value="Raw", tag="load_radio_button")
+                dpg.add_combo(("Raw", "Train", "Test", "Valid"), default_value=None, tag="load_data_combo_box", callback=load_data_combo_cb)
+
+                #with dpg.group(horizontal=True):
+                 #   dpg.add_radio_button(("Raw", "Train", "Test", "Valid"), horizontal=True, default_value="Raw", tag="load_radio_button",)
             
             with dpg.collapsing_header(label="Preprocess"):
                 
