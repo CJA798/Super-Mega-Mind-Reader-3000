@@ -6,7 +6,7 @@ authors = ["Carlos A. <cjacjacja@hotmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.12"
 pandas = "^2.2.1"
 dearpygui = "^1.11.1"
 brainflow = "^5.12.1"
@@ -16,6 +16,9 @@ setuptools = "^69.5.1"
 scipy = "^1.13.0"
 tifffile = "^2024.5.3"
 tqdm = "^4.66.4"
+scikit-learn = "^1.5.1"
+tensorflow-io-gcs-filesystem = "0.31.0"
+tensorflow = "2.10.0"
 
 
 [build-system]

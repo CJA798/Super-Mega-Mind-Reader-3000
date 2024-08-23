@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 from os import path
 from data.dataset_handler import DatasetHandler
 from data.data_collector import DataCollector
+from models.model import ModelHandler
 import os
 import multiprocessing as mp
 import subprocess
@@ -31,6 +32,9 @@ class GUI:
 
         # Initialize the dataset handler
         self.dataset_handler = DatasetHandler()
+
+        # Initialize the model handler
+        self.model_handler = ModelHandler()
         
     def setup_gui(self) -> None:
         '''
@@ -376,7 +380,7 @@ class GUI:
         '''
         Add the model container to the GUI.
         '''
-        def callback(sender, app_data):
+        def model_file_dialog_cb(sender, app_data):
             self.model_path = app_data['file_path_name']
             print("Loaded Model Path: ", self.model_path)
 
@@ -385,13 +389,16 @@ class GUI:
 
         def test_model_cb():
             print("Testing model")
+            model.test_model()
 
         def test_option_cb():
-            print("Training option selected")
+            test_option = dpg.get_value("test_option_radio_button")
+            print(f"'{test_option}' testing option selected")
 
-        with dpg.file_dialog(directory_selector=False, show=False, callback=callback, tag="model_file_dialog_tag", width=700 ,height=400):
+        with dpg.file_dialog(directory_selector=False, show=False, callback=model_file_dialog_cb, tag="model_file_dialog_tag", width=700 ,height=400):
             dpg.add_file_extension("", color=(150, 150, 255, 255))
             dpg.add_file_extension(".hdf5", color=(255, 127, 80, 255))
+            dpg.add_file_extension(".h5", color=(255, 127, 80, 255))
 
         with dpg.window(label="Model",
                         width=self.viewport_width//3,
@@ -404,7 +411,7 @@ class GUI:
             dpg.add_button(label="Load", callback=lambda: dpg.show_item("model_file_dialog_tag"))
             dpg.add_button(label="Train", callback=train_model_cb)
             dpg.add_button(label="Test", callback=test_model_cb)
-            dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0)
+            dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0, tag="test_option_radio_button")
             
     def add_output_container(self):
         '''
@@ -439,6 +446,9 @@ class GUI:
                                         )
 
     def add_experiment_container(self, args):
+        '''
+        Add the experiment container to the GUI.
+        '''
         def cue_button_cb(sender, app_data):
             # Disable the button to avoid re-triggering the callback
             dpg.configure_item(sender, enabled=False)
