@@ -25,11 +25,15 @@ class DatasetHandler():
         self.validation_dataset_path = None
         self.test_dataset_path = None
 
-        # Initialize the datasets
-        self.raw_dataset = None
-        self.train_dataset = None
-        self.validation_dataset = None
-        self.test_dataset = None
+        # Initialize the image data
+        self.train_images = None
+        self.val_images = None
+        self.test_images = None
+
+        # Initialize the label data
+        self.train_labels = None
+        self.val_labels = None
+        self.test_labels = None
 
 
     def load_csv_as_dataframe(self, file_path: str, **kwargs) -> Optional[pd.DataFrame]:
@@ -138,3 +142,34 @@ class DatasetHandler():
                 # Save TIFF image with timestamp in class folder
                 file_path = os.path.join(folder_path, f"{_class}_{index}.tif")  # Adjust file name as needed
                 tifffile.imwrite(file_path, normalized_image)
+
+    def load_tiff_data(self, data_dir):
+        if data_dir is None:
+            raise ValueError("Data directory not set.")
+
+        images = []
+        labels = []
+        class_names = os.listdir(data_dir)
+        for class_name in class_names:
+            class_dir = os.path.join(data_dir, class_name)
+            for file_name in os.listdir(class_dir):
+                file_path = os.path.join(class_dir, file_name)
+                with tifffile.TiffFile(file_path) as tif:
+                    image = tif.asarray()  # Load the image data
+                    images.append(image)
+                    labels.append(class_name)
+
+        # Convert lists to numpy arrays
+        images = np.array(images)
+        labels = np.array(labels)
+
+        # Convert class names to integer labels
+        label_map = {name: i for i, name in enumerate(class_names)}
+        labels = np.array([label_map[label] for label in labels])
+
+        return images, labels
+    
+    def load_train_test_val_directories(self)-> None:
+        self.train_images, self.train_labels = self.load_tiff_data(self.train_dataset_path)
+        self.val_images, self.val_labels = self.load_tiff_data(self.validation_dataset_path)
+        self.test_images, self.test_labels = self.load_tiff_data(self.test_dataset_path)

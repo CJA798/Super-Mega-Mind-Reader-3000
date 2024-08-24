@@ -3,26 +3,24 @@ from tensorflow.keras import Sequential
 from keras.layers import Dense, Conv3D, Dropout, Flatten, MaxPooling3D
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
+import time
 import os
-import tifffile
 
 
 class ModelHandler:
-    def __init__(self):
+    def __init__(self, dataset_handler)-> None:
         self.model_path = None
         self.model = None
 
+        # Initialize the dataset handler
+        self.dataset_handler = dataset_handler
+        
         # Create an O'Neill model by default
         self.create_oneill_model(input_shape=(64, 10, 11, 1), num_labels=2)
 
     def load_h5_or_hdf5(self, model_path):
-        self.model = self.model.load_weights(model_path)
+        self.model.load_weights(model_path)
         print(f"Model weights loaded from {model_path}")
-    
-    def test_model(self, test_images, test_labels):
-        test_loss, test_accuracy = self.model.evaluate(test_images, test_labels)
-        print(f"Test Loss: {test_loss:.4f}")
-        print(f"Test Accuracy: {test_accuracy:.4f}")
 
     def create_oneill_model(self, input_shape, num_labels):
         # Create CNN model
@@ -54,8 +52,23 @@ class ModelHandler:
                             validation_data=(val_images, val_labels),
                             class_weight=class_weight_dict
                             )
+        return history
         
-    def get_class_weights(self, train_labels):
+    def test_model(self, test_images, test_labels)-> None:
+        test_loss, test_accuracy = self.model.evaluate(test_images, test_labels)
+        print(f"Test Loss: {test_loss:.4f}")
+        print(f"Test Accuracy: {test_accuracy:.4f}")
+
+    def save_model(self)-> None:
+        # Get current timestamp
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        # Set the save path
+        save_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "models", f"model_{timestamp}.hdf5")
+        # Save the model
+        self.model.save(save_path)
+        print(f"Model saved to {save_path}")
+
+    def get_class_weights(self, train_labels)-> dict:
         class_weights = compute_class_weight(
             class_weight='balanced',
             classes=np.unique(train_labels),
@@ -63,26 +76,6 @@ class ModelHandler:
         )
         class_weight_dict = dict(enumerate(class_weights))
         print(f"Class weights = {class_weight_dict}")
+        return class_weight_dict
 
-    def load_tiff_data(self):
-        images = []
-        labels = []
-        class_names = os.listdir(self.data_dir)
-        for class_name in class_names:
-            class_dir = os.path.join(self.data_dir, class_name)
-            for file_name in os.listdir(class_dir):
-                file_path = os.path.join(class_dir, file_name)
-                with tifffile.TiffFile(file_path) as tif:
-                    image = tif.asarray()  # Load the image data
-                    images.append(image)
-                    labels.append(class_name)
-
-        # Convert lists to numpy arrays
-        images = np.array(images)
-        labels = np.array(labels)
-
-        # Convert class names to integer labels
-        label_map = {name: i for i, name in enumerate(class_names)}
-        labels = np.array([label_map[label] for label in labels])
-
-        return images, labels
+    

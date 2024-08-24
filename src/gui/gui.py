@@ -34,7 +34,7 @@ class GUI:
         self.dataset_handler = DatasetHandler()
 
         # Initialize the model handler
-        self.model_handler = ModelHandler()
+        self.model_handler = ModelHandler(self.dataset_handler)
         
     def setup_gui(self) -> None:
         '''
@@ -381,19 +381,43 @@ class GUI:
         Add the model container to the GUI.
         '''
         def model_file_dialog_cb(sender, app_data):
-            self.model_path = app_data['file_path_name']
-            self.model_handler.load_h5_or_hdf5(self.model_path)
-            print("Loaded Model Path: ", self.model_path)
+            model_path = app_data['file_path_name']
+            self.model_handler.load_h5_or_hdf5(model_path)
+            print("Loaded Model Path: ", model_path)
 
         def summarize_model_cb():
             print("Model Summary")
             self.model_handler.model.summary()
 
         def train_model_cb():
-            print("Training model")
+            # Load train, test, and validation datasets
+            print("Loading train, test, and validation datasets...")
+            self.dataset_handler.load_train_test_val_directories()
+
+            # Get the class weights (optional)
+            print("Getting class weights...")
+            class_weight_dict = self.model_handler.get_class_weights(self.dataset_handler.train_labels)
+
+            # Train the model
+            print("Training model...")
+            self.model_handler.train_model(self.dataset_handler.train_images,
+                                           self.dataset_handler.train_labels,
+                                           self.dataset_handler.val_images,
+                                           self.dataset_handler.val_labels,
+                                           epochs=10,
+                                           batch_size=32,
+                                           class_weight_dict=class_weight_dict
+                                           )
+            
+            # Save the model
+            self.model_handler.save_model()
+
+            # Test the model
+            self.model_handler.test_model(self.dataset_handler.test_images, self.dataset_handler.test_labels)
+            
 
         def test_model_cb():
-            print("Testing model")
+            self.model_handler.test_model(self.dataset_handler.test_images, self.dataset_handler.test_labels)
 
         def test_option_cb():
             test_option = dpg.get_value("test_option_radio_button")
