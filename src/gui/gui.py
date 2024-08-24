@@ -382,14 +382,18 @@ class GUI:
         '''
         def model_file_dialog_cb(sender, app_data):
             self.model_path = app_data['file_path_name']
+            self.model_handler.load_h5_or_hdf5(self.model_path)
             print("Loaded Model Path: ", self.model_path)
+
+        def summarize_model_cb():
+            print("Model Summary")
+            self.model_handler.model.summary()
 
         def train_model_cb():
             print("Training model")
 
         def test_model_cb():
             print("Testing model")
-            model.test_model()
 
         def test_option_cb():
             test_option = dpg.get_value("test_option_radio_button")
@@ -409,6 +413,7 @@ class GUI:
                         no_resize=True,
                         no_background=False):
             dpg.add_button(label="Load", callback=lambda: dpg.show_item("model_file_dialog_tag"))
+            dpg.add_button(label="Model Summary", callback=summarize_model_cb)
             dpg.add_button(label="Train", callback=train_model_cb)
             dpg.add_button(label="Test", callback=test_model_cb)
             dpg.add_radio_button(("Live", "From Dataset"), callback=test_option_cb, horizontal=True, default_value=0, tag="test_option_radio_button")

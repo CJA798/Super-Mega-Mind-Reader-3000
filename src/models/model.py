@@ -12,6 +12,9 @@ class ModelHandler:
         self.model_path = None
         self.model = None
 
+        # Create an O'Neill model by default
+        self.create_oneill_model(input_shape=(64, 10, 11, 1), num_labels=2)
+
     def load_h5_or_hdf5(self, model_path):
         self.model = self.model.load_weights(model_path)
         print(f"Model weights loaded from {model_path}")
