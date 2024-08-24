@@ -543,12 +543,18 @@ In this experiment, you will be asked to perform different actions at specific c
                            callback=cue_button_cb)
 
     def run(self):
+        '''
+        Run the GUI of the application.
+        '''
         dpg.setup_dearpygui()
         dpg.show_viewport()
         dpg.start_dearpygui()
         dpg.destroy_context()
 
     def run_subject_gui(self, queue, class_list=None, cue_period=None):
+        '''
+        Run the GUI of the application for the subject.
+        '''
         # Set the class list and cue period to default values if not provided
         if not class_list:
             class_list = ["Move", "Relax"]

@@ -13,7 +13,13 @@ from tqdm import tqdm
 
 
 class DatasetHandler():
+    '''
+    A class to handle the dataset.
+    '''
     def __init__(self) -> None:
+        '''
+        Constructor for the DatasetHandler class.
+        '''
         # Initialize the logger
         self.logger = getLogger(__name__)
         self.log_directory_path = os.path.join(os.path.dirname(__file__), 'logs')
@@ -144,6 +150,19 @@ class DatasetHandler():
                 tifffile.imwrite(file_path, normalized_image)
 
     def load_tiff_data(self, data_dir):
+        '''
+        Load the data from the TIFF files in the specified directory.
+        
+        args:
+            data_dir (str): The directory containing the TIFF files.
+            
+        returns:
+            images (np.array): The image data.
+            labels (np.array): The labels for the image data.
+            
+        raises:
+            ValueError: If the data directory is not set.'''
+        
         if data_dir is None:
             raise ValueError("Data directory not set.")
 
@@ -170,6 +189,9 @@ class DatasetHandler():
         return images, labels
     
     def load_train_test_val_directories(self)-> None:
+        '''
+        Load the training, validation and test datasets from the TIFF files in the specified directories.
+        '''
         self.train_images, self.train_labels = self.load_tiff_data(self.train_dataset_path)
         self.val_images, self.val_labels = self.load_tiff_data(self.validation_dataset_path)
         self.test_images, self.test_labels = self.load_tiff_data(self.test_dataset_path)

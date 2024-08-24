@@ -2,6 +2,11 @@ import dearpygui.dearpygui as dpg
 import dearpygui.demo as demo
 import os
 import subprocess
+
+'''
+This script is used to test features
+'''
+
 def test_window():
     dpg.create_context()
     dpg.create_viewport(title='Custom Title', width=600, height=600)

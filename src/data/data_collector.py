@@ -7,6 +7,9 @@ import numpy as np
 from dearpygui.dearpygui import set_value
 
 class DataCollector():
+    '''
+    A class to collect data from the BCI headset.
+    '''
     def __init__(self):
         '''
         Constructor for the DataCollector class.
@@ -41,10 +44,16 @@ class DataCollector():
             return None
     
     def start_streaming(self) -> None:
+        '''
+        Start streaming data from the BCI headset.
+        '''
         self.board.prepare_session()
         self.board.start_stream()
 
     def get_current_board_data(self) -> pd.DataFrame:
+        '''
+        Get the current data from the BCI headset.
+        '''
         data = self.board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
         #data = self.board.get_board_data()  # get all data and remove it from internal buffer
 
@@ -64,6 +73,9 @@ class DataCollector():
         return channel_data
     
     def get_board_data(self) -> pd.DataFrame:
+        '''
+        Get the data from the BCI headset.
+        '''
         data = self.board.get_board_data()  # get all data and remove it from internal buffer
         df = pd.DataFrame(np.transpose(data))
         DataFilter.write_file(data, 'full_dataset.csv', 'w')  # use 'a' for append mode
@@ -71,10 +83,16 @@ class DataCollector():
         return df
     
     def stop_streaming(self) -> None:
+        '''
+        Stop streaming data from the BCI headset.
+        '''
         self.board.stop_stream()
         self.board.release_session()
 
     def collect_data(self):
+        '''
+        Collect data from the BCI headset.
+        '''
         self.print_device_info()
         print("\nStarting data collection...")
         self.start_streaming()
