@@ -18,11 +18,33 @@ class ModelHandler:
         # Create an O'Neill model by default
         self.create_oneill_model(input_shape=(64, 10, 11, 1), num_labels=2)
 
-    def load_h5_or_hdf5(self, model_path):
+    def load_h5_or_hdf5(self, model_path)-> None:
+        '''
+        Load a model from a .h5 or .hdf5 file
+
+        Args:
+            model_path: str
+                Path to the model file
+
+        Returns:
+            None
+        '''
         self.model.load_weights(model_path)
         print(f"Model weights loaded from {model_path}")
 
     def create_oneill_model(self, input_shape, num_labels):
+        '''
+        Create a CNN model based on the O'Neill paper
+        
+        Args:
+            input_shape: tuple
+                Shape of the input data
+            num_labels: int
+                Number of output labels
+
+        Returns:
+            None
+        '''
         # Create CNN model
         self.model = Sequential()
         self.model.add(Conv3D(32, kernel_size=(3, 3, 3), padding='same', input_shape=input_shape))
@@ -45,7 +67,30 @@ class ModelHandler:
                     loss='sparse_categorical_crossentropy',
                     metrics=['accuracy'])
 
-    def train_model(self, train_images, train_labels, val_images, val_labels, class_weight_dict=None, epochs=100, batch_size=32):
+    def train_model(self, train_images, train_labels, val_images, val_labels, class_weight_dict=None, epochs=100, batch_size=32)-> tf.keras.callbacks.History:
+        '''
+        Train the model
+        
+        Args:
+            train_images: np.array
+                Training images
+            train_labels: np.array
+                Training labels
+            val_images: np.array
+                Validation images
+            val_labels: np.array
+                Validation labels
+            class_weight_dict: dict
+                Dictionary of class weights
+            epochs: int
+                Number of epochs
+            batch_size: int
+                Batch size
+                
+        Returns:
+            history: tf.keras.callbacks.History
+                Training history
+        '''
         history = self.model.fit(train_images, train_labels,
                             epochs=epochs,
                             batch_size=batch_size,
@@ -55,11 +100,32 @@ class ModelHandler:
         return history
         
     def test_model(self, test_images, test_labels)-> None:
+        '''
+        Test the model
+        
+        Args:
+            test_images: np.array
+                Test images
+            test_labels: np.array
+                Test labels
+                
+        Returns:
+            None
+        '''
         test_loss, test_accuracy = self.model.evaluate(test_images, test_labels)
         print(f"Test Loss: {test_loss:.4f}")
         print(f"Test Accuracy: {test_accuracy:.4f}")
 
     def save_model(self)-> None:
+        '''
+        Save the model
+
+        Args:
+            None
+
+        Returns:
+            None
+        '''
         # Get current timestamp
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         # Set the save path
@@ -69,6 +135,17 @@ class ModelHandler:
         print(f"Model saved to {save_path}")
 
     def get_class_weights(self, train_labels)-> dict:
+        '''
+        Get class weights for the training data
+
+        Args:
+            train_labels: np.array
+                Training labels
+
+        Returns:
+            class_weight_dict: dict
+                Dictionary of class weights
+        '''
         class_weights = compute_class_weight(
             class_weight='balanced',
             classes=np.unique(train_labels),

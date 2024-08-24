@@ -6,7 +6,6 @@ from typing import Optional, Union, Iterable
 import numpy as np      
 import math
 import tifffile
-import time
 
 from scipy.stats import zscore
 from tqdm import tqdm
@@ -174,7 +173,7 @@ class DatasetHandler():
             for file_name in os.listdir(class_dir):
                 file_path = os.path.join(class_dir, file_name)
                 with tifffile.TiffFile(file_path) as tif:
-                    image = tif.asarray()  # Load the image data
+                    image = tif.asarray()
                     images.append(image)
                     labels.append(class_name)
 
