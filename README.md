@@ -31,7 +31,5 @@ The project offers the following options:
     - Live
       - Starts capturing and making predictions on signal packages from the OpenBCI headset   
 
-### What are the main concepts involved and how are they related?
-TODO: Finish the concepts section
 ## References
 [1]F. Mino, “Training a Convolutional Neural Network to Classify Motor Imagery EEG  Signals for Brain-Computer Interface Applications,” UNC Asheville’s Journal of Undergraduate Research, no. 9, May 2021, Accessed: Mar. 28, 2024. [Online]. Available: https://drive.google.com/file/d/1q4_OXKz2ur8ObY-T47_tPfMJrgcLzlHT/view
